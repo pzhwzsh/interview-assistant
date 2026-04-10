@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text, JSON, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text, JSON, ForeignKey, Boolean, Table
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -12,6 +12,15 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@db:5432
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+
+user_favorites = Table(
+    'user_favorites',
+    Base.metadata,
+    Column('user_id', String, ForeignKey('users.id'), primary_key=True),
+    Column('question_id', String, ForeignKey('questions.id'), primary_key=True),
+    Column('created_at', DateTime, default=datetime.utcnow)
+)
 
 
 class User(Base):
@@ -28,6 +37,7 @@ class User(Base):
     preferences = Column(JSON, default={})
 
     answer_records = relationship("AnswerRecord", back_populates="user")
+    favorite_questions = relationship("Question", secondary=user_favorites, backref="favorited_by")
 
 
 class Question(Base):
@@ -41,6 +51,7 @@ class Question(Base):
     entropy_hash = Column(String, unique=True, index=True)
     question_metadata = Column("metadata", JSON, default={})
     created_at = Column(DateTime, default=datetime.utcnow)
+    interview_mode = Column(String, default="standard")
 
 
 class AnswerRecord(Base):
@@ -55,6 +66,8 @@ class AnswerRecord(Base):
     time_spent = Column(Integer)
     submitted_at = Column(DateTime, default=datetime.utcnow)
     evaluation_details = Column(JSON, default={})
+    answer_type = Column(String, default="text")
+    is_correct = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="answer_records")
     question = relationship("Question")

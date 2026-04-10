@@ -150,7 +150,7 @@ onMounted(() => {
 
 async function loadHistoryData() {
   try {
-    historyData.value = await store.loadHistory()
+    historyData.value = await store.getUserHistory()
   } catch (error) {
     console.error('加载历史记录失败:', error)
   }

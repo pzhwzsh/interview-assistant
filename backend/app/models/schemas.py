@@ -28,6 +28,11 @@ class ProjectType(str, Enum):
     AI_ML = "ai_ml"
 
 
+class AnswerType(str, Enum):
+    TEXT = "text"
+    CODE = "code"
+
+
 class QuestionRequest(BaseModel):
     language: ProgrammingLanguage
     project_type: ProjectType
@@ -51,6 +56,7 @@ class AnswerSubmission(BaseModel):
     answer: str
     time_spent_seconds: int
     self_confidence: Optional[int] = Field(ge=1, le=10, default=5)
+    answer_type: Optional[AnswerType] = AnswerType.TEXT
 
 
 class EvaluationResult(BaseModel):
